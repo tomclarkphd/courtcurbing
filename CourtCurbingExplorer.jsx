@@ -1,67 +1,14 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8" />
-<title>Court-Curbing Bills — Interactive Explorer</title>
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<link rel="preconnect" href="https://cdnjs.cloudflare.com" />
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-  tailwind.config = { theme: { extend: { fontFamily: {
-    serif: ['ui-serif','Georgia','Cambria','Times New Roman','Times','serif'],
-  }}}};
-</script>
-<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
-<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
-<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/prop-types/15.8.1/prop-types.min.js"></script>
-<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/recharts/2.12.7/Recharts.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.24.7/babel.min.js"></script>
-<style>
-  body { font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
-  .loading { display:flex; align-items:center; justify-content:center; height:100vh; color:#64748b; font-size:14px; }
-</style>
-</head>
-<body class="bg-slate-50">
-<div id="root"><div class="loading">Loading interactive explorer…</div></div>
-<script type="text/babel" data-presets="react">
-
-const { useState, useMemo, useRef, useEffect } = React;
-const {
+import React, { useState, useMemo, useRef, useEffect } from "react";
+import {
   ResponsiveContainer, LineChart, Line, AreaChart, Area,
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
   ScatterChart, Scatter, ZAxis, ReferenceLine, Cell, PieChart, Pie,
-} = Recharts;
-const LUCIDE_ICONS = {"Scale": ["m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z", "m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z", "M7 21h10", "M12 3v18", "M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"], "TrendingUp": ["M22 7 13.5 15.5l-5-5L2 17", "M16 7h6v6"], "Users": ["M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2", "M9 7a4 4 0 1 0 0 8 4 4 0 1 0 0-8z", "M22 21v-2a4 4 0 0 0-3-3.87", "M16 3.13a4 4 0 0 1 0 7.75"], "Filter": ["M3 6h18", "M7 12h10", "M10 18h4"], "Download": ["M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4", "M7 10l5 5 5-5", "M12 15V3"], "Search": ["M21 21l-4.35-4.35", "M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16z"], "Info": ["M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z", "M12 16v-4", "M12 8h.01"], "BarChart3": ["M3 3v18h18", "M7 16V8", "M12 16V5", "M17 16v-6"], "Calendar": ["M8 2v4", "M16 2v4", "M3 10h18", "M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"], "Target": ["M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z", "M12 18a6 6 0 1 0 0-12 6 6 0 0 0 0 12z", "M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"], "Gavel": ["m14 13-7.5 7.5a2.12 2.12 0 1 1-3-3L11 10", "m16 16 6-6", "m8 8 6-6", "m9 7 8 8", "m21 11-8-8"], "ChevronDown": ["M6 9l6 6 6-6"], "X": ["M18 6 6 18", "M6 6l12 12"], "TableIcon": ["M12 3v18", "M3 9h18", "M3 15h18", "M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5z"], "Play": ["M6 3l14 9-14 9V3z"], "Pause": ["M6 4h4v16H6z", "M14 4h4v16h-4z"], "BookOpen": ["M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z", "M22 3h-6a4 4 0 0 1-4 4v14a3 3 0 0 0 3-3h7z"], "SkipForward": ["M5 4l10 8-10 8V4z", "M19 5v14"]};
-
-const Icon = ({ name, size = 16, className = '' }) => {
-  const paths = LUCIDE_ICONS[name] || [];
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size}
-      viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-      strokeLinecap="round" strokeLinejoin="round" className={className}
-      style={{display:'inline-block',verticalAlign:'middle',flexShrink:0}}>
-      {paths.map((d, i) => <path key={i} d={d} />)}
-    </svg>
-  );
-};
-const Scale       = (p) => <Icon name="Scale"       {...p} />;
-const TrendingUp  = (p) => <Icon name="TrendingUp"  {...p} />;
-const Users       = (p) => <Icon name="Users"       {...p} />;
-const Filter      = (p) => <Icon name="Filter"      {...p} />;
-const Download    = (p) => <Icon name="Download"    {...p} />;
-const Search      = (p) => <Icon name="Search"      {...p} />;
-const Info        = (p) => <Icon name="Info"        {...p} />;
-const BarChart3   = (p) => <Icon name="BarChart3"   {...p} />;
-const Calendar    = (p) => <Icon name="Calendar"    {...p} />;
-const Target      = (p) => <Icon name="Target"      {...p} />;
-const Gavel       = (p) => <Icon name="Gavel"       {...p} />;
-const ChevronDown = (p) => <Icon name="ChevronDown" {...p} />;
-const X           = (p) => <Icon name="X"           {...p} />;
-const TableIcon   = (p) => <Icon name="TableIcon"   {...p} />;
-const Play        = (p) => <Icon name="Play"        {...p} />;
-const Pause       = (p) => <Icon name="Pause"       {...p} />;
-const SkipForward = (p) => <Icon name="BookOpen": ["M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z", "M22 3h-6a4 4 0 0 1-4 4v14a3 3 0 0 0 3-3h7z"], "SkipForward" {...p} />;
-
+} from "recharts";
+import {
+  Scale, TrendingUp, Users, Filter, Download, Search, Info,
+  BarChart3, Calendar, Target, Gavel, ChevronDown, X, Table as TableIcon,
+  Play, Pause, SkipForward,
+} from "lucide-react";
 
 /* =============================================================================
  * DATA (embedded, array-encoded for compactness)
@@ -195,7 +142,6 @@ const Chip = ({ active, onClick, children, color }) => (
 /* =============================================================================
  * Filter logic
  * ============================================================================= */
-
 
 
 const DEFAULT_FILTERS = (ds = DECODED_LEGACY) => ({
@@ -592,7 +538,7 @@ function IdeologyView({ bills, ds }) {
   const [animMode, setAnimMode] = useState("all"); // "all" | "single" | "cumulative"
   const [animIdx, setAnimIdx] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [speed, setSpeed] = useState(1200);
+  const [speed, setSpeed] = useState(1200); // ms per frame
   const timerRef = useRef(null);
 
   const animCongress = congresses[animIdx] || congresses[0];
@@ -612,7 +558,7 @@ function IdeologyView({ bills, ds }) {
   const visibleBills = useMemo(() => {
     if (animMode === "all") return bills;
     if (animMode === "single") return bills.filter(b => b.congress === animCongress);
-    return bills.filter(b => b.congress <= animCongress);
+    /* cumulative */ return bills.filter(b => b.congress <= animCongress);
   }, [bills, animMode, animCongress]);
 
   const scatter = useMemo(() => {
@@ -633,6 +579,7 @@ function IdeologyView({ bills, ds }) {
 
   const avgSeries = useMemo(() => nominateAverages(bills), [bills]);
 
+  // cs1 distribution (histogram by party)
   const hist = useMemo(() => {
     const bins = [];
     const step = 0.1;
@@ -1222,7 +1169,7 @@ function MethodologyModal({ onClose }) {
  * Main app
  * ============================================================================= */
 
-function CourtCurbingApp() {
+export default function CourtCurbingApp() {
   const [datasetMode, setDatasetMode] = useState("augmented");
   const [showMethodModal, setShowMethodModal] = useState(false);
   const [tab, setTab] = useState("overview");
@@ -1392,11 +1339,3 @@ function CourtCurbingApp() {
     </div>
   );
 }
-
-
-const root = ReactDOM.createRoot(document.getElementById("root"));
-root.render(<CourtCurbingApp />);
-
-</script>
-</body>
-</html>
