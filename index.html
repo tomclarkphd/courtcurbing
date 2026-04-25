@@ -1143,8 +1143,10 @@ function AboutView() {
           <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
             <h3 className="text-sm font-semibold text-slate-900 mb-1">Suggested Citation</h3>
             <p className="text-xs text-slate-600 italic">
-              Clark, Tom S. Court-Curbing Bills in Congress: An Interactive Explorer.
-              Stanford University. Available at courtcurbing.com.
+              Clark, Tom S. 2026. "A Database of Court-Curbing Bills." Stanford University. Available at courtcurbing.com.
+            </p>
+            <p className="text-xs text-slate-600 italic mt-1">
+              Clark, Tom S. 2011. <span className="italic">The Limits of Judicial Independence</span>. Cambridge University Press.
             </p>
           </div>
         </div>
@@ -1245,6 +1247,13 @@ function CourtCurbingApp() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
+      {/* Beta Banner */}
+      <div className="bg-amber-50 border-b border-amber-200 px-4 py-2.5 text-center">
+        <p className="text-sm text-amber-800">
+          <span className="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-700 mr-2 border border-amber-300">BETA</span>
+          This website and its underlying data are in beta release. The data should be taken as still needing further verification and cleaning.
+        </p>
+      </div>
       {/* Header */}
       <header className="bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-900 text-white border-b border-slate-800">
         <div className="max-w-7xl mx-auto px-6 py-8">
