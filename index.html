@@ -19,9 +19,91 @@
 <style>
   body { font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
   .loading { display:flex; align-items:center; justify-content:center; height:100vh; color:#64748b; font-size:14px; }
+  /* Welcome / disclaimer modal */
+  #welcome-modal {
+    position: fixed; inset: 0; z-index: 9999;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(2px);
+  }
+  #welcome-modal .wm-card {
+    background: #ffffff; color: #0f172a;
+    max-width: 520px; width: calc(100% - 2rem);
+    border-radius: 12px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+    padding: 24px 24px 20px 24px;
+    font-size: 15px; line-height: 1.55;
+  }
+  #welcome-modal .wm-title {
+    font-weight: 600; font-size: 17px; margin-bottom: 10px;
+    color: #0f172a;
+  }
+  #welcome-modal .wm-body { color: #334155; }
+  #welcome-modal .wm-actions {
+    margin-top: 18px; display: flex; justify-content: flex-end;
+  }
+  #welcome-modal .wm-ok {
+    background: #1e293b; color: #ffffff;
+    border: none; border-radius: 8px;
+    padding: 8px 18px; font-size: 14px; font-weight: 500;
+    cursor: pointer;
+  }
+  #welcome-modal .wm-ok:hover { background: #0f172a; }
+  #welcome-modal .wm-ok:focus-visible { outline: 2px solid #2563eb; outline-offset: 2px; }
 </style>
 </head>
 <body class="bg-slate-50">
+<!-- Welcome / disclaimer modal: shows once per browser session -->
+<div id="welcome-modal" role="dialog" aria-modal="true" aria-labelledby="welcome-modal-title" style="display:none;">
+  <div class="wm-card">
+    <div class="wm-title" id="welcome-modal-title">Welcome — please read before continuing</div>
+    <div class="wm-body">
+      This page hosts a new dataset of Court-curbing bills to augment Legacy Data
+      that were collected manually and cover the years 1878 through 2008.
+      The Augmented Data are still in Beta release and are still being cleaned.
+      There are likely mistakes. Draw inference with appropriate caution.
+    </div>
+    <div class="wm-actions">
+      <button type="button" class="wm-ok" id="welcome-modal-ok" autofocus>OK</button>
+    </div>
+  </div>
+</div>
+<script>
+  (function () {
+    var KEY = 'ccb_welcome_dismissed_v1';
+    var modal = document.getElementById('welcome-modal');
+    if (!modal) return;
+    try {
+      if (sessionStorage.getItem(KEY) === '1') {
+        modal.parentNode.removeChild(modal);
+        return;
+      }
+    } catch (e) { /* sessionStorage may be unavailable; show modal anyway */ }
+    modal.style.display = 'flex';
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+    function close() {
+      try { sessionStorage.setItem(KEY, '1'); } catch (e) {}
+      document.documentElement.style.overflow = '';
+      document.body.style.overflow = '';
+      if (modal && modal.parentNode) modal.parentNode.removeChild(modal);
+      document.removeEventListener('keydown', onKey, true);
+    }
+    function onKey(ev) {
+      if (ev.key === 'Enter' || ev.key === 'Escape' || ev.key === ' ') {
+        ev.preventDefault();
+        close();
+      }
+    }
+    document.getElementById('welcome-modal-ok').addEventListener('click', close);
+    document.addEventListener('keydown', onKey, true);
+    // Focus the OK button so Enter/Space dismisses immediately.
+    setTimeout(function () {
+      var btn = document.getElementById('welcome-modal-ok');
+      if (btn) btn.focus();
+    }, 0);
+  })();
+</script>
 <div id="root"><div class="loading">Loading interactive explorer…</div></div>
 <script type="text/babel" data-presets="react">
 
@@ -1185,8 +1267,10 @@ function MethodologyModal({ onClose }) {
                 Re-audited modern tier covering the 93rd–119th Congresses. Uses an expanded set of
                 11 subject tags plus regex text-scanning of all bill titles and summaries. Validated
                 across all 17 Congresses with overlapping coverage (93rd–109th): the legacy dataset
-                captured only 328 of 822 court-curbing bills (40%), missing approximately 60%. The
-                under-count ranges from 26% to 89% depending on Congress.
+                captured only 328 of 822 court-curbing bills (40%), missing approximately 60%,
+                most of which were constitutional amendments. The under-count ranges from 26% to 89%
+                depending on Congress. However, the counts of the number of bills each Congress are
+                correlated at roughly .84.
               </p>
             </div>
 
